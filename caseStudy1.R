@@ -115,13 +115,3 @@ ggplot(uniBonusDataMale, mapping = aes(y = `Male`, x = `EmployerId`)) +
         x = "EmployerId",
         y = "Percent of employees receiving bonus")
   
-install.packages("kableExtra")
-library(kableExtra)
-  
-pay17 <- read_csv("https://gender-pay-gap.service.gov.uk/viewing/download-data/2017")
-pay18 <- read_csv("https://gender-pay-gap.service.gov.uk/viewing/download-data/2018")
-pay19 <- read_csv("https://gender-pay-gap.service.gov.uk/viewing/download-data/2019")
-pay20 <- read_csv("https://gender-pay-gap.service.gov.uk/viewing/download-data/2020")
-pay21 <- read_csv("https://gender-pay-gap.service.gov.uk/viewing/download-data/2020")
-universities <- read_csv("https://drive.google.com/file/d/16pB69LJjerjtLcN7Bv17oGwG5v3T1cgM/view?usp=sharing")
-  
