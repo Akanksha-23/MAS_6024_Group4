@@ -1,0 +1,109 @@
+---
+title: "__Case Study-1 Report__"
+author: "By Group 4"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+```
+
+## Objective of the analysis
+The main objective of this report is to study the pay gap data from the UK government's Gender Pay Gap Service and perform a preliminary analysis of the data to summarize its characteristics. Our investigation is limited to the data from the universities in the UK. We have taken the data for the last four years and summarized our findings into the following graphical images. 
+
+## Understanding the data
+For this report, we explored data from four consecutive years. The files contained Employer details like Name, Id, Address, and some pay gap statistics. This analysis is on data from 96 universities. 
+
+The statistical elements of the data give the difference between the male and female pay/bonus pay in percentage. The negative values denote that the values were higher for female employees than male employees.
+
+
+```{r}
+library(tidyverse)
+library(kableExtra)
+```
+
+```{r}
+pay17 <- read_csv("https://gender-pay-gap.service.gov.uk/viewing/download-data/2017")
+pay18 <- read_csv("https://gender-pay-gap.service.gov.uk/viewing/download-data/2018")
+pay19 <- read_csv("https://gender-pay-gap.service.gov.uk/viewing/download-data/2019")
+pay20 <- read_csv("https://gender-pay-gap.service.gov.uk/viewing/download-data/2020")
+pay21 <- read_csv("https://gender-pay-gap.service.gov.uk/viewing/download-data/2020")
+universities <- read_csv("https://drive.google.com/file/d/16pB69LJjerjtLcN7Bv17oGwG5v3T1cgM/view?usp=sharing")
+
+##### Adding EmployerId column to the universities data
+universitiesId <- pay17 %>% inner_join(universities, by = "EmployerName") %>%
+                  select(EmployerId, EmployerName, institution)
+
+##### Extracting universities data for each year based strictly on employerId
+uniPayGap17 <- pay17 %>% 
+              mutate( year = "2017/18"  ) %>%
+              select(-EmployerName) %>%
+              inner_join(universitiesId, by = "EmployerId")
+
+uniPayGap18 <- pay18 %>% 
+              mutate( year = "2018/19"  ) %>%
+              select(-EmployerName) %>%
+              inner_join(universitiesId, by = "EmployerId")
+
+uniPayGap19 <- pay19 %>% 
+              mutate( year = "2019/20"  ) %>%
+              select(-EmployerName) %>%
+              inner_join(universitiesId, by = "EmployerId")
+
+uniPayGap20 <- pay20 %>% 
+              mutate( year = "2020/21"  ) %>%
+              select(-EmployerName) %>%
+              inner_join(universitiesId, by = "EmployerId")
+
+payGapData <- rbind(uniPayGap17, uniPayGap18, uniPayGap19, uniPayGap20)
+```
+
+
+```{r payGapData}
+payGapDataFrame <- payGapData %>% 
+                  as.data.frame()
+
+knitr::kable(head(payGapDataFrame, 4)) %>% kable_styling(full_width = FALSE, font_size = 11, bootstrap_options = c("bordered", "condensed", "responsive")) %>% scroll_box(width = "1000px")
+```
+
+##
+As is evident from the table below, not all universities reported their data for all the years because rules changed from 2019-20 onwards, employers weren't required to upload their details, so some didn't. It is crucial to take this into account as it may explain the variation in the data patterns.
+
+```{r}
+countData <- payGapData %>% count(year)
+knitr::kable(countData, col.names = c("Year", "No. of universities recorded data"), align = "rc") %>% kable_styling(full_width = TRUE, bootstrap_options = "bordered", font_size = 11)
+```
+
+## Our analysis
+to be completed.....
+```{r, fig.align = 'center', fig.dim = c(16, 9), fig.cap = "Fig-1 : Average percent of employees getting bonus in different universities"}
+bonusData <- payGapData %>% 
+  select(`EmployerId`, `EmployerName`, `MaleBonusPercent`, `FemaleBonusPercent`, `year`) %>% 
+  arrange(`EmployerId`)
+
+uniBonusDataMale <- bonusData %>% 
+  group_by(EmployerId, EmployerName) %>%
+  summarise(Male = mean(MaleBonusPercent))
+
+uniBonusDataFemale <- bonusData %>% 
+  group_by(EmployerId, EmployerName) %>%
+  summarise(Female = mean(FemaleBonusPercent)) 
+
+ggplot(uniBonusDataMale, mapping = aes(y = `Male`, x = `EmployerId`)) + 
+  geom_line(uniBonusDataMale, mapping = aes(y = `Male`, x = `EmployerId`, color = "Male")) +
+  geom_point(uniBonusDataMale, mapping = aes(y = `Male`, x = `EmployerId`, color = "Male")) + 
+  geom_line(uniBonusDataFemale, mapping = aes(y = `Female`, x = `EmployerId`, color = "Female"))+
+  geom_point(uniBonusDataFemale, mapping = aes(y = `Female`, x = `EmployerId`, color ="Female"))+
+  scale_color_manual(aesthetics =  c("Male"="blue", "Female"="red")) +
+  labs( x = "EmployerId",
+        y = "Percent of employees receiving bonus")
+```
+
+## Conclusion
+We explored different aspects of the data and concluded that: 
+
+* Albeit the pay gap has been decreasing in most cases throughout the years, there is still a significant gap in the pay of men and women.
+
+* There is a pattern in the trends for pre-92 and post-92 institutions. The difference is often higher in pre-92 universities than in post-92 universities. 
+
+* Typically, the hourly pay for male employees is higher than female employees. The wages of the males come in the top quartile in most cases, whereas that of the female employees are in the lower and middle quartiles.
